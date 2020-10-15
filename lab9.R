@@ -1,11 +1,50 @@
 library(shiny)
 library(dplyr)
 
+
+clean_accidents <- read.csv("./accidentes/datosLimpios.csv")
+
+# renombrar columnas
+colnames(clean_accidents)[colnames(clean_accidents) == 'aÃ.o_ocu'] <- 'anio_ocu'
+colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ.a_ocu'] <- 'dia_ocu'
+colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ.a_sem_ocu'] <- 'dia_sem_ocu'
+
+# Graficas a estudiar
+# Color de carro
+bike_colors <- clean_accidents %>%
+  filter(clean_accidents["anio_ocu"] >= 2015 & clean_accidents["anio_ocu"] <= 2018) %>%
+  count(color_veh, sort=TRUE) %>%
+  top_n(10)
+
+barplot(
+  bike_colors$n, 
+  names.arg=bike_colors$color_veh,
+  main="Color de motocicletas", 
+  xlab="Color", 
+  ylab="Cantidad",
+  col=palette(rainbow(10)),
+  cex.names=.7,
+)
+
+# Cantidad de accidentes por anio
+yearly_accidents <- clean_accidents %>%
+  count(anio_ocu, sort=TRUE)
+
+barplot(
+  yearly_accidents$n, 
+  names.arg=yearly_accidents$anio_ocu,
+  main="Cantidad de accidentes por año", 
+  xlab="Año", 
+  ylab="Accidentes",
+  col=palette(rainbow(10)),
+  cex.names=.7,
+)
+
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
     includeCSS("styles.css"),
-    titlePanel("Shiny App"),
+    titlePanel("Lab 9: Accidentes en Motocicletas en Guatemala"),
     sidebarLayout(
         position="right",
         sidebarPanel("sidebar panel"),
