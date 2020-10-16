@@ -40,6 +40,21 @@ barplot(
   cex.names=.7,
 )
 
+# Ocurrencias de accidentes por mes
+monthly_accidents <- clean_accidents %>%
+  filter(clean_accidents["anio_ocu"] == 2015) %>%
+  count(mes_ocu, sort=TRUE)
+
+barplot(
+  monthly_accidents$n, 
+  names.arg=monthly_accidents$mes_ocu,
+  main="Cantidad de accidentes mensualmente", 
+  xlab="Meses", 
+  ylab="Accidentes",
+  col=palette(rainbow(10)),
+  cex.names=.7,
+)
+
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
