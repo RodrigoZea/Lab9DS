@@ -13,22 +13,6 @@ colnames(clean_accidents)[colnames(clean_accidents) == 'día_ocu'] <- 'dia_ocu'
 colnames(clean_accidents)[colnames(clean_accidents) == 'día_sem_ocu'] <- 'dia_sem_ocu'
 
 # Graficas a estudiar
-# Color de carro
-# bike_colors <- clean_accidents %>%
-#   filter(clean_accidents["anio_ocu"] >= 2015 & clean_accidents["anio_ocu"] <= 2018) %>%
-#   count(color_veh, sort=TRUE) %>%
-#   top_n(10)
-# 
-# barplot(
-#   bike_colors$n, 
-#   names.arg=bike_colors$color_veh,
-#   main="Color de motocicletas", 
-#   xlab="Color", 
-#   ylab="Cantidad",
-#   col=palette(rainbow(10)),
-#   cex.names=.7
-# )
-
 # Cantidad de accidentes por anio
 yearly_accidents <- clean_accidents %>%
   count(anio_ocu, sort=TRUE)
@@ -68,11 +52,20 @@ ui <- fluidPage(
         sidebarPanel("luis carlos esturban rodriguez"),
         mainPanel(
             textOutput("test_output"),
-            sliderInput("year_range", "Coger anio:",
-                        min = 2015, max = 2018,
-                        value = c(2015, 2018)
+            
+            # Plot de accidentes agrupados por color y slider para elegir rango
+            # de años.
+            fluidRow(
+              12, align="center",
+              plotOutput("acc_color", width="100%"),
             ),
-            plotOutput("acc_color", width="50%"),
+            fluidRow(
+              12, align="center",
+              sliderInput("year_range", "Rango de Años:",
+                          min = 2015, max = 2018,
+                          value = c(2015, 2018)
+              ),
+            )
         ),
     ),
 )
@@ -94,7 +87,8 @@ server = function(input, output, session) {
         )
     })
     
-    # slider para anio, aca esta como acceder a los valores
+    # Grafica de accidentes agrupados por color, se accede a los valores de los
+    # sliders para definir los años para filtrar los datos.
     output$acc_color = renderPlot({
       bike_colors <- clean_accidents %>%
         filter(clean_accidents["anio_ocu"] >= input$year_range[1] & clean_accidents["anio_ocu"] <= input$year_range[2]) %>%
@@ -104,7 +98,7 @@ server = function(input, output, session) {
       barplot(
         bike_colors$n, 
         names.arg=bike_colors$color_veh,
-        main="Color de motocicletas", 
+        main="Accidentes por Color y Años", 
         xlab="Color", 
         ylab="Cantidad",
         col=palette(rainbow(10)),
