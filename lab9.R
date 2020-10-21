@@ -44,28 +44,40 @@ barplot(
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
-
     includeCSS("styles.css"),
     titlePanel("Lab 9: Accidentes en Motocicletas en Guatemala"),
     sidebarLayout(
         position="right",
         sidebarPanel("luis carlos esturban rodriguez"),
         mainPanel(
-            textOutput("test_output"),
-            
             # Plot de accidentes agrupados por color y slider para elegir rango
             # de años.
             fluidRow(
-              12, align="center",
+              align="center",
               plotOutput("acc_color", width="100%"),
             ),
             fluidRow(
-              12, align="center",
-              sliderInput("year_range", "Rango de Años:",
+              align="center",
+              sliderInput("slider0", "Rango de Años:",
                           min = 2015, max = 2018,
                           value = c(2015, 2018)
               ),
-            )
+            ),
+            
+            # Plot de accidentes por año
+            fluidRow(
+              align="center",
+              plotOutput("acc_yearly", width="100%"),
+            ),
+            
+            fluidRow(
+              align="center",
+              radioButtons(
+                "radio_button0",
+                "Ordenar",
+                c("Por cantidad", "Por año")
+              ),
+            ),
         ),
     ),
 )
@@ -91,7 +103,7 @@ server = function(input, output, session) {
     # sliders para definir los años para filtrar los datos.
     output$acc_color = renderPlot({
       bike_colors <- clean_accidents %>%
-        filter(clean_accidents["anio_ocu"] >= input$year_range[1] & clean_accidents["anio_ocu"] <= input$year_range[2]) %>%
+        filter(clean_accidents["anio_ocu"] >= input$slider0[1] & clean_accidents["anio_ocu"] <= input$slider0[2]) %>%
         count(color_veh, sort=TRUE) %>%
         top_n(10)
       
@@ -103,6 +115,27 @@ server = function(input, output, session) {
         ylab="Cantidad",
         col=palette(rainbow(10)),
         cex.names=.7
+      )
+    })
+    
+    # Grafica de accidentes por año
+    output$acc_yearly = renderPlot({
+      if (input$radio_button0 == "Por cantidad") {
+        yearly_accidents <- clean_accidents %>%
+          count(anio_ocu, sort=TRUE)
+      } else {
+        yearly_accidents <- clean_accidents %>%          
+          count(anio_ocu, sort=FALSE)
+      }
+      
+      barplot(
+        yearly_accidents$n, 
+        names.arg=yearly_accidents$anio_ocu,
+        main="Cantidad de accidentes por anio", 
+        xlab="Anio", 
+        ylab="Accidentes",
+        col=palette(rainbow(10)),
+        cex.names=.7,
       )
     })
 }
