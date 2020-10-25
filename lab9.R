@@ -9,8 +9,8 @@ colnames(clean_accidents)[colnames(clean_accidents) == 'a√.o_ocu'] <- 'anio_ocu'
 colnames(clean_accidents)[colnames(clean_accidents) == 'd√.a_ocu'] <- 'dia_ocu'
 colnames(clean_accidents)[colnames(clean_accidents) == 'd√.a_sem_ocu'] <- 'dia_sem_ocu'
 #colnames(clean_accidents)[colnames(clean_accidents) == 'a√±o_ocu'] <- 'anio_ocu'
-#colnames(clean_accidents)[colnames(clean_accidents) == 'd√≠a_ocu'] <- 'dia_ocu'
-#colnames(clean_accidents)[colnames(clean_accidents) == 'd√≠a_sem_ocu'] <- 'dia_sem_ocu'
+#colnames(clean_accidents)[colnames(clean_accidents) == 'd√?a_ocu'] <- 'dia_ocu'
+#colnames(clean_accidents)[colnames(clean_accidents) == 'd√?a_sem_ocu'] <- 'dia_sem_ocu'
 
 # Graficas a estudiar
 # Cantidad de accidentes por anio
@@ -20,7 +20,7 @@ pie <- data.frame(table(clean_accidents$sexo_per))
 pie = pie[-1,]
 
 
-
+library(plotly)
 
 
 yearly_accidents <- clean_accidents %>%
@@ -91,7 +91,7 @@ ui <- fluidPage(
             # Plot de accidentes por a√±o
             fluidRow(
               align="center",
-              plotOutput("pie", width="100%"),
+              plotlyOutput("pie", width="100%"),
             ),
             
         ),
@@ -155,21 +155,17 @@ server = function(input, output, session) {
       )
     })
     
-    output$pie = renderPlot({
-      
-      # Create Data
+    output$pie = renderPlotly({
+
       data <- data.frame(
         Sexo=c("Mujer","Hombre"),
         value=c(35,611)
       )
       
-      # Basic piechart
-      ggplot(data, aes(x="", y=value, fill=Sexo)) +
-        geom_bar(stat="identity", width=1, color="white") +
-        coord_polar("y", start=0) +
-        
-        theme_void() # remove background, grid, numeric labels
-      
+      fig <- plot_ly(data, labels = ~Sexo, values = ~value, type = 'pie')
+      fig <- fig %>% layout(title = 'Cantidad de accidentes con hombres y mujeres involucrados',
+                            xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       
       
       
@@ -178,3 +174,6 @@ server = function(input, output, session) {
 
 # Create Shiny app ----
 shinyApp(ui, server)
+
+
+
