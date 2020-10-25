@@ -1,27 +1,36 @@
 library(shiny)
 library(dplyr)
-
+library(ggplot2)
 
 clean_accidents <- read.csv("./accidentes/datosLimpios.csv")
 
 # renombrar columnas
-colnames(clean_accidents)[colnames(clean_accidents) == 'a?.o_ocu'] <- 'anio_ocu'
-colnames(clean_accidents)[colnames(clean_accidents) == 'd?.a_ocu'] <- 'dia_ocu'
-colnames(clean_accidents)[colnames(clean_accidents) == 'd?.a_sem_ocu'] <- 'dia_sem_ocu'
-colnames(clean_accidents)[colnames(clean_accidents) == 'aÃ±o_ocu'] <- 'anio_ocu'
-colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ­a_ocu'] <- 'dia_ocu'
-colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ­a_sem_ocu'] <- 'dia_sem_ocu'
+colnames(clean_accidents)[colnames(clean_accidents) == 'aÃ.o_ocu'] <- 'anio_ocu'
+colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ.a_ocu'] <- 'dia_ocu'
+colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ.a_sem_ocu'] <- 'dia_sem_ocu'
+#colnames(clean_accidents)[colnames(clean_accidents) == 'aÃ±o_ocu'] <- 'anio_ocu'
+#colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ­a_ocu'] <- 'dia_ocu'
+#colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ­a_sem_ocu'] <- 'dia_sem_ocu'
 
 # Graficas a estudiar
 # Cantidad de accidentes por anio
+
+
+pie <- data.frame(table(clean_accidents$sexo_per))
+pie = pie[-1,]
+
+
+
+
+
 yearly_accidents <- clean_accidents %>%
   count(anio_ocu, sort=TRUE)
 
 barplot(
   yearly_accidents$n, 
   names.arg=yearly_accidents$anio_ocu,
-  main="Cantidad de accidentes por a?o", 
-  xlab="A?o", 
+  main="Cantidad de accidentes por año", 
+  xlab="Año", 
   ylab="Accidentes",
   col=palette(rainbow(10)),
   cex.names=.7,
@@ -58,7 +67,7 @@ ui <- fluidPage(
             ),
             fluidRow(
               align="center",
-              sliderInput("slider0", "Rango de AÃ±os:",
+              sliderInput("slider0", "Rango de Años:",
                           min = 2015, max = 2018,
                           value = c(2015, 2018)
               ),
@@ -75,9 +84,16 @@ ui <- fluidPage(
               radioButtons(
                 "radio_button0",
                 "Ordenar",
-                c("Por cantidad", "Por aÃ±o")
+                c("Por cantidad", "Por año")
               ),
             ),
+            
+            # Plot de accidentes por aÃ±o
+            fluidRow(
+              align="center",
+              plotOutput("pie", width="100%"),
+            ),
+            
         ),
     ),
 )
@@ -110,7 +126,7 @@ server = function(input, output, session) {
       barplot(
         bike_colors$n, 
         names.arg=bike_colors$color_veh,
-        main="Accidentes por Color y AÃ±os", 
+        main="Accidentes por Color y Años", 
         xlab="Color", 
         ylab="Cantidad",
         col=palette(rainbow(10)),
@@ -131,12 +147,32 @@ server = function(input, output, session) {
       barplot(
         yearly_accidents$n, 
         names.arg=yearly_accidents$anio_ocu,
-        main="Cantidad de accidentes por anio", 
+        main="Cantidad de accidentes por año", 
         xlab="Anio", 
         ylab="Accidentes",
         col=palette(rainbow(10)),
         cex.names=.7,
       )
+    })
+    
+    output$pie = renderPlot({
+      
+      # Create Data
+      data <- data.frame(
+        Sexo=c("Mujer","Hombre"),
+        value=c(35,611)
+      )
+      
+      # Basic piechart
+      ggplot(data, aes(x="", y=value, fill=Sexo)) +
+        geom_bar(stat="identity", width=1, color="white") +
+        coord_polar("y", start=0) +
+        
+        theme_void() # remove background, grid, numeric labels
+      
+      
+      
+      
     })
 }
 
