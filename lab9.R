@@ -1,6 +1,7 @@
 library(shiny)
 library(dplyr)
 library(ggplot2)
+library(plotly)
 
 clean_accidents <- read.csv("./accidentes/datosLimpios.csv")
 
@@ -18,10 +19,6 @@ colnames(clean_accidents)[colnames(clean_accidents) == 'dÃ.a_sem_ocu'] <- 'dia_s
 
 pie <- data.frame(table(clean_accidents$sexo_per))
 pie = pie[-1,]
-
-
-library(plotly)
-
 
 yearly_accidents <- clean_accidents %>%
   count(anio_ocu, sort=TRUE)
@@ -54,10 +51,22 @@ barplot(
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
     includeCSS("styles.css"),
-    titlePanel("Lab 9: Accidentes en Motocicletas en Guatemala"),
+    headerPanel(
+      div(
+        h1("LAB 9: ACCIDENTES EN MOTOCICLETAS EN GUATEMALA", id = "title1"),
+        id = "headPanel"
+      )
+    ),
+    
     sidebarLayout(
         position="right",
-        sidebarPanel("luis carlos esturban rodriguez"),
+        sidebarPanel(
+          tags$style(".well {background-color:#003049;}"),
+          h3("INTEGRANTES DEL EQUIPO:"),
+          h4("Sebastian Arriola"),
+          h4("Rodrigo Zea"),
+          h4("Gustavo de Leon"),
+        ),
         mainPanel(
             # Plot de accidentes agrupados por color y slider para elegir rango
             # de aÃ±os.
@@ -123,13 +132,15 @@ server = function(input, output, session) {
         count(color_veh, sort=TRUE) %>%
         top_n(10)
       
+      par(bg = '#eae2b7')
       barplot(
         bike_colors$n, 
         names.arg=bike_colors$color_veh,
         main="Accidentes por Color y Años", 
+        border=NA,
         xlab="Color", 
         ylab="Cantidad",
-        col=palette(rainbow(10)),
+        col="#f77f00",
         cex.names=.7
       )
     })
@@ -144,13 +155,15 @@ server = function(input, output, session) {
           count(anio_ocu, sort=FALSE)
       }
       
+      par(bg = '#eae2b7')
       barplot(
         yearly_accidents$n, 
         names.arg=yearly_accidents$anio_ocu,
         main="Cantidad de accidentes por año", 
+        border=NA,
         xlab="Anio", 
         ylab="Accidentes",
-        col=palette(rainbow(10)),
+        col= "#d62828",
         cex.names=.7,
       )
     })
@@ -165,7 +178,10 @@ server = function(input, output, session) {
       fig <- plot_ly(data, labels = ~Sexo, values = ~value, type = 'pie')
       fig <- fig %>% layout(title = 'Cantidad de accidentes con hombres y mujeres involucrados',
                             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                            yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                            plot_bgcolor='rgb(254, 247, 234)',
+                            paper_bgcolor='transparent'
+                            )
       
       
       
